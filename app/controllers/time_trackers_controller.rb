@@ -37,7 +37,18 @@ class TimeTrackersController < ApplicationController
     else
       flash[:error] = l(:time_tracker_already_running_error)
     end
-    redirect_to "/tt_overview"
+    respond_to do |format|
+      format.html { redirect_to_referer_or {render :text => ('Time tracking started.'), :layout => true}}
+      format.js do
+        render(:update) do |page|
+          issue = Issue.where(:id => @time_tracker.issue_id).first
+          if !issue.nil?
+            c = time_tracker_css(User.current())
+            page << %|$$(".#{c}").each(function(el){el.innerHTML="#{escape_javascript time_tracker_link(issue, User.current)}"});|
+          end
+        end
+      end
+    end
   end
 
   def stop
@@ -52,8 +63,19 @@ class TimeTrackersController < ApplicationController
       end
       @time_tracker.stop
       flash[:error] = l(:stop_time_tracker_error) unless @time_tracker.destroyed?
-      @time_tracker = get_current
-      redirect_to "/tt_overview"
+    end
+	@time_tracker = get_current
+    respond_to do |format|
+      format.html { redirect_to_referer_or {render :text => ('Time tracking started.'), :layout => true}}
+      format.js do
+        render(:update) do |page|
+          issue = Issue.where(:id => params[:time_tracker][:issue_id]).first
+          if !issue.nil?
+            c = time_tracker_css(User.current())
+            page << %|$$(".#{c}").each(function(el){el.innerHTML="#{escape_javascript time_tracker_link(issue, User.current)}"});|
+          end
+        end
+      end
     end
   end
 

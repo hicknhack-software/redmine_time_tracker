@@ -1,18 +1,7 @@
 <% time_tracker = time_tracker_for(User.current) %>
-<% if !time_tracker.nil? %>
+<% if !time_tracker.nil?  || (!@project.nil? and !@issue.nil? and User.current.allowed_to?(:log_time, @project)) %>
     <%# A time tracker exists, display the stop action %>
     <li>
-      <%= link_to_remote l(:stop_time_tracker).capitalize + ' #' + time_tracker.issue_id.to_s,
-                         :url => {:controller => '/time_trackers', :action => 'stop'},
-                         :html => {:class => 'icon icon-stop'} %>
-    </li>
-<% elsif !@project.nil? and !@issue.nil? and User.current.allowed_to?(:log_time, @project) %>
-    <%# No time tracker is running, but the user has the rights to track time on this issue %>
-    <%# Display the start time tracker action %>
-    <li>
-      <%= link_to_remote l(:start_time_tracker).capitalize + ' #' + @issue.id.to_s,
-                         :url => {:controller => '/time_trackers', :action => 'start', :time_tracker => {:issue_id => @issue.id}},
-                         :html => {:class => 'icon icon-start'}
-      %>
+      <%= time_tracker_link(@issue, User.current) %>
     </li>
 <% end %>

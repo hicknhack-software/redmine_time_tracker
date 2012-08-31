@@ -39,4 +39,29 @@ module ApplicationHelper
 
     false
   end
+  
+  def time_tracker_button_tag(object, user, options={})
+    content_tag("span", time_tracker_link(object, user), :class => time_tracker_css(User.current()))
+  end
+  
+  def time_tracker_link(object, user)
+     time_tracker = time_tracker_for(user) 
+     if !time_tracker.nil? 
+        # A time tracker exists, display the stop action 
+        link_to_remote l(:stop_time_tracker).capitalize + ' #' + time_tracker.issue_id.to_s,
+                             :url => {:controller => '/time_trackers', :action => 'stop', :time_tracker => {:issue_id => object.id}},
+                             :html => {:class => 'icon icon-stop'} 
+     elsif !object.nil? and !object.project.nil? and user.allowed_to?(:log_time, object.project) 
+        # No time tracker is running, but the user has the rights to track time on this issue 
+        # Display the start time tracker action 
+        link_to_remote l(:start_time_tracker).capitalize + ' #' + object.id.to_s,
+                             :url => {:controller => '/time_trackers', :action => 'start', :time_tracker => {:issue_id => object.id}},
+                             :html => {:class => 'icon icon-start'} 
+     end 
+  end
+  
+  def time_tracker_css(object)
+    "#{object.class.to_s.underscore}-#{object.id}-time_tracker"
+  end
+
 end
