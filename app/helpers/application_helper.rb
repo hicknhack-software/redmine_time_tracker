@@ -49,7 +49,7 @@ module ApplicationHelper
      if !time_tracker.nil? 
         # A time tracker exists, display the stop action 
         link_to l(:stop_time_tracker).capitalize + ' #' + time_tracker.issue_id.to_s,
-          {:controller => '/time_trackers', :action => 'stop', :time_tracker => {:issue_id => object.id}},
+          {:controller => '/time_trackers', :action => 'stop', :time_tracker => {}},
           :class => 'icon icon-stop'
      elsif !object.nil? and !object.project.nil? and user.allowed_to?(:log_time, object.project) 
         # No time tracker is running, but the user has the rights to track time on this issue 
