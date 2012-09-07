@@ -11,7 +11,7 @@ class TimeBooking < ActiveRecord::Base
   validates :time_entry_id, :presence => true, :unless => Proc.new { |tb| tb.virtual }
   validates_associated :virtual_comment, :if => Proc.new { |tb| tb.virtual }
 
-  # scope :last_two_weeks, where("started_on > ? ", (Time.now-2.weeks).beginning_of_day)
+  # scope :last_two_weeks, where("started_on > ? ", (Time.now.localtime-2.weeks).beginning_of_day)
 
   def initialize(args = {}, options = {})
     ActiveRecord::Base.transaction do
@@ -23,7 +23,7 @@ class TimeBooking < ActiveRecord::Base
         proj = Project.where(:id => args[:project_id]).first
         if User.current.allowed_to?(:log_time, proj)
           self.project = proj
-          self.write_attribute(:project_id, proj.id)
+          write_attribute(:project_id, proj.id)
         end
         self.update_attributes({:virtual => true, :time_log_id => args[:time_log_id], :started_on => args[:started_on], :stopped_at => args[:stopped_at]})
         self.comments = args[:comments]
