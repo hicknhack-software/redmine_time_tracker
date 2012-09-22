@@ -51,7 +51,7 @@ module ApplicationHelper
         link_to l(:stop_time_tracker).capitalize + ' #' + time_tracker.issue_id.to_s,
           {:controller => '/time_trackers', :action => 'stop', :time_tracker => {}},
           :class => 'icon icon-stop'
-     elsif !object.nil? and !object.project.nil? and user.allowed_to?(:log_time, object.project) 
+            elsif !object.nil? and !object.project.nil? and user.allowed_to?(:use_time_tracker_plugin, nil, :global => true) and user.allowed_to?(:log_time, object.project)  
         # No time tracker is running, but the user has the rights to track time on this issue 
         # Display the start time tracker action 
         link_to l(:start_time_tracker).capitalize + ' #' + object.id.to_s,
