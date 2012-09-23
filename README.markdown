@@ -19,6 +19,8 @@ The advanced features are going to be implemented soon.
 My goal is to have a release with all main-features within the next two month
 (that means till 08/2012)
 
+The master branch supports redmine 2.x only. 
+
 ## Features
 
 * Per user time tracking
