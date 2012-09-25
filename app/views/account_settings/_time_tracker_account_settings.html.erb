@@ -1,0 +1,12 @@
+<% if @user.allowed_to?({:controller => 'tt_overview', :action => 'index'},nil, :global => true ) %>
+	</fieldset>
+	<fieldset class="box">
+		<legend><%=l(:time_tracker_label_account_settings)%></legend>
+		<div class="tabular">
+			<%= labelled_fields_for :pref, @user.pref do |pref_fields| %>
+				<p><%= pref_fields.check_box :time_tracker_enabled %></p>
+			<% end %>
+		</div>
+	</fieldset>
+<% end %>	
+

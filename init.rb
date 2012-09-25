@@ -51,7 +51,7 @@ Redmine::Plugin.register :redmine_time_tracker do
 
   # setup an menu entry into the redmine top-menu on the upper left corner
   menu :top_menu, :time_tracker_main_menu, {:controller => 'tt_overview', :action => 'index'}, :caption => :time_tracker_label_main_menu,
-  :if => Proc.new { User.current.allowed_to?({:controller => 'tt_overview', :action => 'index'},nil, :global => true ) }
+  :if => Proc.new { User.current.allowed_to?({:controller => 'tt_overview', :action => 'index'},nil, :global => true ) &&  !User.current.nil? && User.current.pref[:time_tracker_enabled] }
 
   Redmine::MenuManager.map :timetracker_menu do |menu|
     menu.push :time_tracker_menu_tab_overview, {:controller => 'tt_overview', :action => 'index'}, :caption => :time_tracker_label_menu_tab_overview, :if => Proc.new { User.current.logged? }

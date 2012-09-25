@@ -9,4 +9,7 @@ class TimeTrackerHooks < Redmine::Hook::ViewListener
     js += javascript_include_tag 'autocomplete.js', :plugin => 'redmine_time_tracker'
     css + js
   end
+  
+  render_on :view_my_account, :partial => 'account_settings/time_tracker_account_settings', :layout => false
+  
 end
