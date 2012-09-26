@@ -8,6 +8,7 @@ require 'tt_user_patch'
 require 'tt_project_patch'
 require 'tt_menu_patch'
 require 'tt_query_patch'
+require 'tt_issue_patch'
 
 require 'tt_sort_helper_patch'
 require 'tt_application_helper_patch'
@@ -31,7 +32,7 @@ Redmine::Plugin.register :redmine_time_tracker do
 
   requires_redmine :version_or_higher => '2.0.0'
 
-  settings :default => {:refresh_rate => '60', :status_transitions => {}}, :partial => 'settings/time_tracker'
+  settings :default => {:refresh_rate => '60', :status_transitions => {}, :stop_on_close => '0' }, :partial => 'settings/time_tracker'
 
   Redmine::AccessControl.map do |map|
     map.project_module :redmine_timetracker_plugin_settings do

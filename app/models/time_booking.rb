@@ -21,10 +21,8 @@ class TimeBooking < ActiveRecord::Base
       if args[:issue].nil?
         # create a virtual booking
         proj = Project.where(:id => args[:project_id]).first
-        if User.current.allowed_to?(:log_time, proj)
-          self.project = proj
-          write_attribute(:project_id, proj.id)
-        end
+        self.project = proj
+        write_attribute(:project_id, proj.id)
         self.update_attributes({:virtual => true, :time_log_id => args[:time_log_id], :started_on => args[:started_on], :stopped_at => args[:stopped_at]})
         self.comments = args[:comments]
       else
@@ -33,11 +31,9 @@ class TimeBooking < ActiveRecord::Base
         # current user could be the user himself or the admin. whoever it is, the peron needs the permission to do that
         # but in any way, the user_id which will be stored, is the user_id from the timeLog. this way the admin can book
         # times for any of his users..
-        if User.current.allowed_to?(:log_time, args[:issue].project)
           # TODO check for user-specific setup (limitations for bookable times etc)
-          time_entry = create_time_entry({:issue => args[:issue], :user_id => args[:user_id], :comments => args[:comments], :started_on => args[:started_on], :activity_id => args[:activity_id], :hours => args[:hours]})
-          super({:time_entry_id => time_entry.id, :time_log_id => args[:time_log_id], :started_on => args[:started_on], :stopped_at => args[:stopped_at], :project_id => args[:issue].project.id})
-        end
+        time_entry = create_time_entry({:issue => args[:issue], :user_id => args[:user_id], :comments => args[:comments], :started_on => args[:started_on], :activity_id => args[:activity_id], :hours => args[:hours]})
+        super({:time_entry_id => time_entry.id, :time_log_id => args[:time_log_id], :started_on => args[:started_on], :stopped_at => args[:stopped_at], :project_id => args[:issue].project.id})
       end
     end
   end

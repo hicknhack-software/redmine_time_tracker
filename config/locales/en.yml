@@ -81,4 +81,5 @@ en:
   time_tracker_settings_zombie_transition: "zombie status transition"
   time_tracker_zombie_legend: "zombie time tracker"
   field_time_tracker_enabled: "Time Tracker Enabled"
+  time_tracker_stop_on_close: "Stop on close"
 

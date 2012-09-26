@@ -8,6 +8,10 @@
     <%= text_field_tag 'settings[refresh_rate]', @settings[:refresh_rate], {:size => 4} %>
     (<%= l(:time_tracker_seconds) %>)
   </p>
+  <p>
+    <%= label_tag 'settings[stop_on_close]', l(:time_tracker_stop_on_close) %>
+  	<%= check_box_tag 'settings[stop_on_close]', @settings[:stop_on_close], @settings[:stop_on_close] %>
+  </p>
 </div>
 
 <h3><%= l(:time_tracker_settings_transition_title) %></h3>
@@ -18,5 +22,5 @@
   <p><%= l(:time_tracker_settings_transition_note) %></p>
 
   <%= render :partial => 'time_trackers/status_transition_list', :locals => {:transitions => @settings[:status_transitions]} %>
-
+  
 <%# The div is not close as redmine will close the one opened before rendering this view. As we close this div at the begining of the view, we need an open one before returning. %>
