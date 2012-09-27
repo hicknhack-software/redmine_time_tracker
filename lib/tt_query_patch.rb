@@ -112,7 +112,7 @@ module QueryPatch
     def booking_count
       # TODO refactor includes
       TimeBooking.
-          includes([:project, :virtual_comment, :time_entry => :issue, :time_log => :user]).
+          includes([:project, :virtual_comment, {:time_entry => :issue}, {:time_log => :user}]).
           where(statement).
           count(:id)
     rescue ::ActiveRecord::StatementInvalid => e

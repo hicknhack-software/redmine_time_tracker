@@ -47,11 +47,9 @@ class TimeLog < ActiveRecord::Base
     tb = TimeBooking.create(args)
     # tb.persisted? will be true if transaction was successfully completed
     if tb.persisted?
-      logger.debug "created booking"
       self.bookable = (bookable_hours - tb.hours_spent > 0)
       self.save!
     else
-      logger.debug "failed to create booking"
       false
     end
   end

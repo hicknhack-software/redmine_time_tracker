@@ -82,7 +82,6 @@ class TimeTracker < ActiveRecord::Base
           unless issue.nil?
             # project_id will be set during the add_booking method
             time_log.project_id = issue.project_id
-            logger.debug("Create booking with issue id = #{issue_id}, project id = #{project_id}")
             time_log.add_booking(:issue => issue)
           end
           # otherwise we check for a project-id and associate the timeLog with an project only, using the project_id-field
