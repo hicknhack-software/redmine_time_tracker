@@ -1,4 +1,4 @@
-<% if !User.current.nil? && User.current.pref[:time_tracker_enabled] && !@project.nil? && @issue.nil?%>
+<% if !User.current.nil? && User.current.pref[:time_tracker_enabled] && !@project.nil?%>
 	<h3><%= l( :time_tracker_label_account_settings ) %></h3>
-	<%= time_tracker_button_tag(User.current, :project => @project) %>
+	<%= time_tracker_button_tag(User.current, :project => @project, :issue => @issue ) %>
 <% end %>
