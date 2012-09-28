@@ -17,14 +17,11 @@ class TimeBooking < ActiveRecord::Base
     ActiveRecord::Base.transaction do
       super(nil)
       self.save
+      logger.debug "Time booking created with args: #{args}"
       # without issue_id, create an virtual booking!
       if args[:issue].nil?
-        # create a virtual booking
-        proj = Project.where(:id => args[:project_id]).first
-        self.project = proj
-        write_attribute(:project_id, proj.id)
-        self.update_attributes({:virtual => true, :time_log_id => args[:time_log_id], :started_on => args[:started_on], :stopped_at => args[:stopped_at]})
-        self.comments = args[:comments]
+        time_entry = create_time_entry({:user_id => args[:user_id], :comments => args[:comments], :started_on => args[:started_on], :activity_id => args[:activity_id], :hours => args[:hours], :project_id => args[:project_id]})
+        super({:time_entry_id => time_entry.id, :time_log_id => args[:time_log_id], :started_on => args[:started_on], :stopped_at => args[:stopped_at], :project_id => args[:project_id]})
       else
         # create a normal booking
         # to enforce a user to "log time" the admin has to set the redmine permissions
@@ -144,11 +141,15 @@ class TimeBooking < ActiveRecord::Base
   end
 
   private
-
+  
   def create_time_entry(args ={})
     # TODO check for user-specific setup (limitations for bookable times etc)
     # create a timeBooking to combine a timeLog-entry and a timeEntry
-    time_entry = args[:issue].time_entries.create({:comments => args[:comments], :spent_on => args[:started_on], :activity_id => args[:activity_id]})
+    if args[:issue].nil?
+      time_entry = Project.find(args[:project_id]).time_entries.create({:comments => args[:comments], :spent_on => args[:started_on], :activity_id => args[:activity_id]})      
+    else
+      time_entry = args[:issue].time_entries.create({:comments => args[:comments], :spent_on => args[:started_on], :activity_id => args[:activity_id]})
+    end
     time_entry.hours = args[:hours]
     # due to the mass-assignment security, we have to set the user_id extra
     time_entry.user_id = args[:user_id]

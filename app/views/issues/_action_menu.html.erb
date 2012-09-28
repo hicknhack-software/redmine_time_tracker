@@ -2,7 +2,7 @@
 
 <%= link_to_if_authorized(l(:button_update), {:controller => 'issues', :action => 'edit', :id => @issue }, :onclick => 'showAndScrollTo("update", "notes"); return false;', :class => 'icon icon-edit', :accesskey => accesskey(:edit)) %>
 <% if !User.current.nil? && User.current.pref[:time_tracker_enabled] %>
-	<%= time_tracker_button_tag(@issue, User.current) %>
+	<%= time_tracker_button_tag(User.current, {:issue => @issue, :project => @issue.project}) %>
 <% end %>
 <%= link_to l(:button_log_time), new_issue_time_entry_path(@issue), :class => 'icon icon-time-add' if User.current.allowed_to?(:log_time, @project) %>
 <%= watcher_tag(@issue, User.current) %>

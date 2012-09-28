@@ -40,23 +40,37 @@ module ApplicationHelper
     false
   end
   
-  def time_tracker_button_tag(object, user, options={})
-    content_tag("span", time_tracker_link(object, user), :class => time_tracker_css(User.current()))
+  def time_tracker_button_tag(user, options={})
+    content_tag("span", time_tracker_link(user, options), :class => time_tracker_css(User.current()))
   end
   
-  def time_tracker_link(object, user)
+  def time_tracker_link(user, options)
      time_tracker = time_tracker_for(user) 
      if !time_tracker.nil? 
-        # A time tracker exists, display the stop action 
-        link_to l(:stop_time_tracker).capitalize + ' #' + time_tracker.issue_id.to_s,
-          {:controller => '/time_trackers', :action => 'stop', :time_tracker => {}},
-          :class => 'icon icon-stop'
-            elsif !object.nil? and !object.project.nil? and user.allowed_to?(:use_time_tracker_plugin, nil, :global => true) and user.allowed_to?(:log_time, object.project)  
+        # A time tracker exists, display the stop action
+       if time_tracker.issue_id.nil? && !time_tracker.project_id.nil?
+         link_to l(:stop_time_tracker).capitalize + ': ' + Project.find(time_tracker.project_id).name,
+                    {:controller => '/time_trackers', :action => 'stop', :time_tracker => {}},
+                    :class => 'icon icon-stop'
+       else
+         link_to l(:stop_time_tracker).capitalize + ' #' + time_tracker.issue_id.to_s,
+           {:controller => '/time_trackers', :action => 'stop', :time_tracker => {}},
+           :class => 'icon icon-stop'
+       end 
+     elsif !options[:project].nil? and user.allowed_to?(:use_time_tracker_plugin, nil, :global => true) and user.allowed_to?(:log_time, options[:project])
         # No time tracker is running, but the user has the rights to track time on this issue 
-        # Display the start time tracker action 
-        link_to l(:start_time_tracker).capitalize + ' #' + object.id.to_s,
-          {:controller => '/time_trackers', :action => 'start', :time_tracker => {:issue_id => object.id}},
-          :class => 'icon icon-start'
+        # Display the start time tracker action
+       if options[:issue].nil?
+         link_to l(:start_time_tracker).capitalize + ': ' +  options[:project].name,
+             {:controller => '/time_trackers', :action => 'start', :time_tracker => {:project_id => options[:project].id}},
+           :class => 'icon icon-start'
+       else
+         link_to l(:start_time_tracker).capitalize + ' #' +  options[:issue].id.to_s,
+             {:controller => '/time_trackers', :action => 'start', :time_tracker => {:issue_id => options[:issue].id,
+             :project_id => options[:project].id}},
+           :class => 'icon icon-start'
+       end 
+
      end 
   end
   

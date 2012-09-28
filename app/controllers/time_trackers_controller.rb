@@ -7,7 +7,7 @@ class TimeTrackersController < ApplicationController
   # we could start an empty timeTracker to track time without any association.
   # we also can give some more information, so the timeTracker could be automatically associated later.
   def start(args = {})
-    default_args= {:issue_id => nil, :comments => nil}
+    default_args= {:issue_id => nil, :project_id => nil, :comments => nil}
     args = default_args.merge(args)
 
     @time_tracker = get_current
@@ -15,10 +15,11 @@ class TimeTrackersController < ApplicationController
       # TODO work out a nicer way to get the params from the form
       unless params[:time_tracker].nil?
         args[:issue_id]=params[:time_tracker][:issue_id] if args[:issue_id].nil?
+        args[:project_id]=params[:time_tracker][:project_id] if args[:project_id].nil?
         args[:comments]=params[:time_tracker][:comments] if args[:comments].nil?
       end
       # parse comments for issue-id
-      if args[:issue_id].nil? && args[:comments].strip.match(/\A#\d?\d*/)
+      if args[:issue_id].nil? && !args[:comments].nil? && args[:comments].strip.match(/\A#\d?\d*/)
         cut = args[:comments].strip.partition(/#\d?\d*/)
         issue_id = cut[1].sub(/#/, "").to_i
         unless help.issue_from_id(issue_id).nil?
@@ -28,7 +29,7 @@ class TimeTrackersController < ApplicationController
       end
 
 
-      @time_tracker = TimeTracker.new(:issue_id => args[:issue_id], :comments => args[:comments])
+      @time_tracker = TimeTracker.new(:issue_id => args[:issue_id], :project_id => args[:project_id], :comments => args[:comments])
       if @time_tracker.start
         apply_status_transition(Issue.where(:id => args[:issue_id]).first) unless Setting.plugin_redmine_time_tracker[:status_transitions] == nil
       else
@@ -44,7 +45,7 @@ class TimeTrackersController < ApplicationController
           issue = Issue.where(:id => @time_tracker.issue_id).first
           if !issue.nil?
             c = time_tracker_css(User.current())
-            page << %|$$(".#{c}").each(function(el){el.innerHTML="#{escape_javascript time_tracker_link(issue, User.current)}"});|
+            page << %|$$(".#{c}").each(function(el){el.innerHTML="#{escape_javascript time_tracker_link(User.current, {:issue => issue, :project => project })}"});|
           end
         end
       end
@@ -72,7 +73,7 @@ class TimeTrackersController < ApplicationController
           issue = Issue.where(:id => params[:time_tracker][:issue_id]).first
           if !issue.nil?
             c = time_tracker_css(User.current())
-            page << %|$$(".#{c}").each(function(el){el.innerHTML="#{escape_javascript time_tracker_link(issue, User.current)}"});|
+            page << %|$$(".#{c}").each(function(el){el.innerHTML="#{escape_javascript time_tracker_link(User.current, {:issue => issue, :project => project})}"});|
           end
         end
       end

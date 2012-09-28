@@ -2,6 +2,6 @@
 <% if !time_tracker.nil?  || (!@project.nil? and !@issue.nil? and User.current.allowed_to?(:log_time, @project)) && !User.current.nil? && User.current.pref[:time_tracker_enabled] %>
     <%# A time tracker exists, display the stop action %>
     <li>
-      <%= time_tracker_link(@issue, User.current) %>
+      <%= time_tracker_link(User.current, { :issue => @issue, :project => @project}) %>
     </li>
 <% end %>
