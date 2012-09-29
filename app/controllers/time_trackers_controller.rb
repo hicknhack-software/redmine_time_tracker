@@ -82,13 +82,14 @@ class TimeTrackersController < ApplicationController
 
   def delete
     time_tracker = TimeTracker.where(:id => params[:id]).first
-    time_tracker = nil unless User.current.id == time_tracker.user_id || User.current.admin? # user could only delete his own entries, except he's admin
+    time_tracker = nil unless time_tracker.nil? || User.current.id == time_tracker.user_id || User.current.admin? # user could only delete his own entries, except he's admin
     if time_tracker.nil?
-      render :text => l(:time_tracker_delete_fail)
+      flash[:error] = l(:time_tracker_delete_fail)
     else
       time_tracker.destroy
-      render :text => l(:time_tracker_delete_success)
+      flash[:notice] = l(:time_tracker_delete_success)
     end
+    redirect_to_referer_or
   end
 
   def update
