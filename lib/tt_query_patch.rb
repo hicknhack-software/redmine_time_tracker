@@ -131,7 +131,7 @@ module QueryPatch
           gbs = group_by_statement
           gbs = "#{Project.table_name}.name" if gbs == "project"
           r = TimeBooking.
-              includes([:project, :virtual_comment, :time_entry => :issue, :time_log => :user]).
+              includes([:project, :virtual_comment, {:time_entry => :issue}, {:time_log => :user}]).
               group(gbs).
               where(statement).
               count(:id)
@@ -155,7 +155,7 @@ module QueryPatch
       order_option = nil if order_option.blank?
 
       TimeBooking.
-          includes([:project, :virtual_comment, :time_entry => :issue, :time_log => :user]).
+          includes([:project, :virtual_comment, {:time_entry => :issue}, {:time_log => :user}]).
           where(statement).
           order(order_option).
           limit(options[:limit]).
@@ -221,7 +221,6 @@ module QueryPatch
 
     # sql statements for where clauses have to be in an "sql_for_#{filed-name}_field" method
     # so we have to implement some where-clauses for every new filter here
-    # todo implement all filters
     def sql_for_tt_project_field(field, operator, value)
       if value.delete('mine')
         value += User.current.memberships.map(&:project_id).map(&:to_s)

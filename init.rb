@@ -32,7 +32,8 @@ Redmine::Plugin.register :redmine_time_tracker do
 
   requires_redmine :version_or_higher => '2.0.0'
 
-  settings :default => {:refresh_rate => '60', :status_transitions => {}, :stop_on_close => '0' }, :partial => 'settings/time_tracker'
+  #settings :default => {:refresh_rate => '60', :status_transitions => {}}, :partial => 'settings/time_tracker'
+  settings :default => {:report_title => 'Report', :report_logo_url => '', :report_logo_width => '150', :stop_on_close => '0'}, :partial => 'settings/time_tracker'
 
   Redmine::AccessControl.map do |map|
     map.project_module :redmine_timetracker_plugin_settings do
@@ -57,8 +58,8 @@ Redmine::Plugin.register :redmine_time_tracker do
   Redmine::MenuManager.map :timetracker_menu do |menu|
     menu.push :time_tracker_menu_tab_overview, {:controller => 'tt_overview', :action => 'index'}, :caption => :time_tracker_label_menu_tab_overview, :if => Proc.new { User.current.logged? }
     menu.push :time_tracker_menu_tab_list, {:controller => 'time_list', :action => 'index'}, :caption => :time_tracker_label_menu_tab_logs, :if => Proc.new { User.current.logged? }
-    #menu.push :time_tracker_menu_tab_stats, {:controller => 'time_logs', :action => 'index'}, :caption => :time_tracker_label_menu_tab_stats, :if => Proc.new { User.current.logged? }
     menu.push :time_tracker_menu_tab_active_trackers, {:controller => 'tt_info', :action => 'index'}, :caption => :time_tracker_label_menu_tab_active_trackers, :if => Proc.new { User.current.logged? }
+    menu.push :time_tracker_menu_tab_reporting, {:controller => 'tt_reporting', :action => 'index'}, :caption => :time_tracker_label_menu_tab_reports, :if => Proc.new { User.current.logged? }
   end
 end
 

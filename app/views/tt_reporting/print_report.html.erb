@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <%= stylesheet_link_tag 'tt_report', :plugin => 'redmine_time_tracker', :media => "all" %>
+  <%= javascript_include_tag 'prototype.js' %>
+  <%= javascript_include_tag 'highcharts/prototype-adapter.js', :plugin => 'redmine_time_tracker' %>
+  <%= javascript_include_tag 'highcharts/highcharts.js', :plugin => 'redmine_time_tracker' %>
+</head>
+<body>
+<table style="width: 100%;">
+  <tr>
+    <td id="tt_report-title">
+      <h2><%= Setting.plugin_redmine_time_tracker[:report_title] %></h2>
+    </td>
+    <td id="tt_report-logo">
+      <%= image_tag @logo_url, :border => 0, :width => @logo_width, :alt => "Insert Your logo via plugin-settings", :plugin => (@logo_external ? nil : 'redmine_time_tracker') %>
+    </td>
+  </tr>
+</table>
+<table style="width: 100%;">
+  <tr>
+    <td id="tt_report-statistics">
+      <%= l(:time_tracker_report_total_time) %><br/>
+      <%= @total_booked_time %>
+    </td>
+    <td id="tt_report-chart-table">
+      <div id="tt_report-print-chart"></div>
+    </td>
+  </tr>
+</table>
+
+
+<table class="list">
+  <thead>
+  <tr>
+    <th class="tt_report-date"><%= l(:time_tracker_label_date) %></th>
+    <th class="tt_report-desc-head"><%= l(:time_tracker_label_description) %></th>
+    <th class="tt_report-time"><%= l(:time_tracker_label_time_spent) %></th>
+    <th class="tt_report-pers-head"><%= l(:time_tracker_label_person) %></th>
+  </tr>
+  </thead>
+  <tbody>
+
+  <% @bookings.each do |entry| -%>
+      <!--TODO insert grouped-functionality-->
+      <tr id="entry-<%= entry.id %>" class="entry <%= cycle('odd', 'even') %>">
+        <td class="tt_report-date"><%= entry.tt_booking_date %></td>
+        <td>
+          <div>
+            <div style="min-height: 1em;"><%= entry.comments %></div>
+            <div class="tt_list-project"><%= entry.project.name unless entry.project.nil? %></div>
+          </div>
+        </td>
+        <td class="tt_report-time"><%= help.time_string4report(entry.get_formatted_time) %></td>
+        <td><%= entry.user.name %></td>
+      </tr>
+  <% end -%>
+
+  </tbody>
+</table>
+</body>
+</html>
+
+
+<script type="text/javascript" charset="utf-8">
+    var tt_report_print_chart; // globally available
+    document.observe("dom:loaded", function () {
+        tt_report_print_chart = new Highcharts.Chart({
+            chart:{
+                renderTo:'tt_report-print-chart',
+                type:'column'
+            },
+            plotOptions:{
+                column:{
+                    borderWidth:0,
+                    shadow:false,
+                    animation:false
+                }
+            },
+            colors: [ '#999' ], // for printing we only use a light gray
+            title:{ text:'<%= l(:time_tracker_chart_title) %>' },
+            legend:{ enabled:false },
+            xAxis:{
+                type:'datetime',
+                labels:{
+                    style:{
+                        fontSize:'10px',
+                        color:'#484848'
+                    }
+                },
+                minorTickInterval: <%= 1.day * 1000 %>,
+                minorGridLineWidth: 0,
+                minorTickWidth: 1
+            },
+            yAxis:{
+                title:{ text:'' },
+                labels:{
+                    style:{
+                        fontSize:'10px',
+                        color:'#484848'
+                    }
+                }
+            },
+            series:[
+                {
+                    pointInterval: <%= 1.day * 1000 %>,
+                    pointStart: <%= @chart_start_date.at_midnight.to_i * 1000 %>,
+                    data: <%= @chart_data %>
+                }
+            ]
+        });
+    });
+</script>
