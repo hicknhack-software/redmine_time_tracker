@@ -18,11 +18,11 @@
       <li>
         <%= if @time_booking.nil? then
               context_menu_link l(:time_tracker_label_continue),
-                                {:controller => 'time_trackers', :action => 'start', :time_tracker => {:issue_id => nil, :comments => nil}},
+                                {:controller => 'time_trackers', :action => 'start', :time_tracker => {:issue_id => nil, :project_id => nil, :comments => nil}},
                                 :remote => false, :disabled => true
             else
               context_menu_link l(:time_tracker_label_continue),
-                                {:controller => 'time_trackers', :action => 'start', :time_tracker => {:issue_id => @time_booking.time_entry.issue.nil? ? nil : @time_booking.time_entry.issue.id, :comments => @time_booking.comments}},
+                                {:controller => 'time_trackers', :action => 'start', :time_tracker => {:issue_id => @time_booking.time_entry.issue.nil? ? nil : @time_booking.time_entry.issue.id, :project_id => @time_booking.time_entry.project.nil? ? nil : @time_booking.time_entry.project.id, :comments => @time_booking.comments}},
                                 :remote => false, :disabled => false
             end %>
       </li>
