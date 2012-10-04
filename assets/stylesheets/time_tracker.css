@@ -9,11 +9,6 @@
     border-color: red;
 }
 
-tr.entry {
-    white-space: nowrap;
-    text-align: center;
-}
-
 .task_form_top_fields, .task_form_btottom_fields {
     width: 100%;
     position: relative;
