@@ -98,6 +98,7 @@
 #tt-time-list td.comments,
 #user-time-logs-list td.comments {
     text-align: left;
+		white-space: normal;
 }
 
 #time_tracker_list td.user,
