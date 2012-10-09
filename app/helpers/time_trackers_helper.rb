@@ -68,12 +68,6 @@ module TimeTrackersHelper
     sec.to_f / 3600
   end
 
-  def calendar_for_tt(field_id)
-    #include_calendar_headers_tags
-    image_tag("calendar.png", {:id => "#{field_id}_trigger", :class => "calendar-trigger"}) +
-        javascript_tag("Calendar.setup({inputField : '#{field_id}', ifFormat : '%Y-%m-%d', button : '#{field_id}_trigger', onUpdate : updateTTControllerForm });")
-  end
-
   def tt_retrieve_query
     if !params[:query_id].blank?
       cond = "project_id IS NULL"
@@ -83,7 +77,6 @@ module TimeTrackersHelper
       @query.project = @project
       session[:tt_query] = {:id => @query.id, :project_id => @query.project_id}
       sort_clear
-      #elsif params[:set_filter]
     elsif params[:set_filter] == "1" && !@query_give_logs && !@query_give_bookings ||
         params[:set_filter] == "2" && @query_give_logs && !@query_give_bookings ||
         params[:set_filter] == "3" && !@query_give_logs && @query_give_bookings ||
@@ -145,6 +138,6 @@ module TimeTrackersHelper
 
     # temporarily limit the available filters and columns for the view!
     @query_bookings.available_filters.delete_if { |key, value| !key.to_s.start_with?('tt_') }
-    @query_bookings.available_columns.delete_if { |item| !([:id, :user,:project, :tt_booking_date, :get_formatted_start_time, :get_formatted_stop_time, :issue, :comments, :get_formatted_time].include? item.name) }
+    @query_bookings.available_columns.delete_if { |item| !([:id, :user, :project, :tt_booking_date, :get_formatted_start_time, :get_formatted_stop_time, :issue, :comments, :get_formatted_time].include? item.name) }
   end
 end

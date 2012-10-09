@@ -18,6 +18,7 @@
         <legend onclick="toggleFieldset(this);"><%= l(:label_filter_plural) %></legend>
         <div style="<%= @query.new_record? ? "" : "display: none;" %>">
           <%= render :partial => 'queries/filters', :locals => {:query => @query} %>
+          <%= javascript_tag render :partial => 'queries/expand_filter_menu', :formats => [:js] %>
         </div>
       </fieldset>
       <fieldset class="collapsible collapsed">
@@ -46,7 +47,7 @@
       <%= link_to l(:button_clear), {:set_filter => 1, :project_id => @project}, :class => 'icon icon-reload' %>
       <% if @query.new_record? && User.current.allowed_to?(:save_queries, @project, :global => true) %>
           <%= link_to_function l(:button_save),
-                               "$('query_form').action='#{ @project ? new_project_query_path(@project) : new_query_path }'; submit_query_form('query_form')",
+                               "$('#query_form').attr('action', '#{ @project ? new_project_query_path(@project) : new_query_path }'); submit_query_form('query_form')",
                                :class => 'icon icon-save' %>
       <% end %>
     </p>
@@ -66,4 +67,4 @@
     <%= render_sidebar_queries %>
 <% end %>
 
-<%= context_menu time_list_context_menu_path  %>
+<%= context_menu time_list_context_menu_path %>
