@@ -15,16 +15,22 @@ class TimeLog < ActiveRecord::Base
   has_many :time_bookings, :dependent => :delete_all
   has_many :time_entries, :through => :time_bookings
 
+  # prevent that updating the time_log results in negative bookable_time
+  validate :check_time_spent, :on => :update
+  validate :check_bookable, :on => :update
+
   scope :bookable, where(:bookable => true)
 
-#  belongs_to :project
+  def check_time_spent
+    raise BookingError, l(:tt_update_log_results_in_negative_time) if self.bookable_hours < 0
+  end
 
   def initialize(arguments = nil, *args)
     super(arguments)
   end
 
   # if issue is the only parameter we get, we will book the whole time to one issue
-  # method returns true if all works well, false otherwise
+  # method returns the booking.id if transaction was successfully completed, raises an error otherwise
   def add_booking(args = {})
     tea = TimeEntryActivity.where(:name => :time_tracker_activity).first
     default_args = {:started_on => self.started_on, :stopped_at => self.stopped_at, :comments => self.comments, :activity_id => tea.id, :issue => nil, :spent_time => nil, :virtual => false, :project_id => self.project_id}
@@ -47,10 +53,10 @@ class TimeLog < ActiveRecord::Base
     tb = TimeBooking.create(args)
     # tb.persisted? will be true if transaction was successfully completed
     if tb.persisted?
-      self.bookable = (bookable_hours - tb.hours_spent > 0)
-      self.save!
+      update_attribute(:bookable, bookable_hours - tb.hours_spent > 0)
+      tb.id # return the booking id to get the last added booking
     else
-      false
+      raise BookingError, l(:error_add_booking_failed)
     end
   end
 
@@ -59,8 +65,24 @@ class TimeLog < ActiveRecord::Base
     ((time2.to_i - time1.to_i) / 3600.0).to_f
   end
 
+  def hours_booked
+    time_booked = 0
+    time_bookings.each do |tb|
+      time_booked += tb.hours_spent
+    end
+    time_booked
+  end
+
   def get_formatted_bookable_hours
     help.time_dist2string((bookable_hours*3600).to_i)
+  end
+
+  def get_formatted_time_span
+    help.time_dist2string((hours_spent*3600).to_i)
+  end
+
+  def get_formatted_booked_time
+    help.time_dist2string((hours_booked*3600).to_i)
   end
 
   def get_formatted_start_time
@@ -79,15 +101,10 @@ class TimeLog < ActiveRecord::Base
   # if log was not booked at all, so the whole time is bookable
   def bookable_hours
     # every gap between the bookings represents bookable time so we sum up the time to show it as bookable time
-    time_booked = 0
-    time_bookings.each do |tb|
-      time_booked += tb.hours_spent
-    end
-    hours_spent - time_booked
+    hours_spent - hours_booked
   end
 
   def check_bookable
-    self.bookable = (bookable_hours > 0)
-    self.save!
+    update_attribute(:bookable, bookable_hours > 0)
   end
 end
