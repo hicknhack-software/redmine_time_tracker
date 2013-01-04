@@ -27,8 +27,14 @@ module ContextMenusControllerControllerPatch
       render :layout => false
     end
 
-    def time_list
+    def tt_bookings_list
       @time_booking_ids = params[:ids]
+
+      render :layout => false
+    end
+
+    def tt_logs_list
+      @time_log_ids = params[:ids]
 
       render :layout => false
     end

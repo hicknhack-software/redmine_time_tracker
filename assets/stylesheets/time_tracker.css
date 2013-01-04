@@ -4,13 +4,22 @@
     }
 }
 
+input:disabled,
+select:disabled,
+input[readonly="readonly"] {
+    color: #545454;
+    background-color: #EBEBE4;
+    border: 1px solid #999;
+}
+
 fieldset#filters td.values input[type="button"] {
     height: auto;
 }
 
 .invalid {
-    border-style: solid;
-    border-color: red;
+    border: 2px solid #D00;
+    background-color: #FFE3E3;
+    color: #800;
 }
 
 .task_form_top_fields, .task_form_btottom_fields {

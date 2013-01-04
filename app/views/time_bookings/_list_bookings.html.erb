@@ -10,8 +10,7 @@
                 <table class="list">
                   <thead>
                   <tr>
-                    <!-- TODO check if following JS function works with my entries instead of issues as well -->
-                    <th class="checkbox hide-when-print"><%= link_to image_tag('toggle_check.png'), {}, :onclick => 'toggleIssuesSelection(Element.up(this, "form")); return false;',
+                    <th class="checkbox hide-when-print"><%= link_to image_tag('toggle_check.png'), {}, :onclick => 'toggleIssuesSelection(this); return false;',
                                                                      :title => "#{l(:button_check_all)}/#{l(:button_uncheck_all)}" %>
                     </th>
                     <% query.columns.each do |column| %>
@@ -44,8 +43,8 @@
                                 <td colspan="<%= query.columns.size + 1 %>">
                                   <span class="expander" onclick="toggleRowGroup(this);">&nbsp;</span>
                                   <%= group.blank? ? 'None' : column_content(query.group_by_column, entry) %>
-                                  <span class="count">(<%= group.nil? ? @booking_count_by_group[nil] : @booking_count_by_group[group] %>
-                                    )</span>
+                                  <span class="count">(<%= group.nil? ? @booking_count_by_group[nil] : (@booking_count_by_group.keys[0].is_a?(Date) ? @booking_count_by_group[group.to_date] : @booking_count_by_group[group]) %>)
+                                  </span>
                                   <!-- TODO rewrite function-call -->
                                   <%= link_to_function("#{l(:button_collapse_all)}/#{l(:button_expand_all)}", "toggleAllRowGroups(this)", :class => 'toggle-all') %>
                                 </td>
@@ -54,7 +53,6 @@
                           <% end %>
                       <% end %>
 
-                      <!-- look at issues\_list! the following line contains a method to add css-classes dynamically there.. -->
                       <tr id="booking-entry-<%= entry.id %>" class="hascontextmenu entry <%= cycle('odd', 'even') %>">
                         <%= render :partial => 'time_bookings/list_entry', :locals => {:entry => entry, :query => query} %>
                       </tr>

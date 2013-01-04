@@ -13,7 +13,7 @@ class TimeTracker < ActiveRecord::Base
   # TODO add auto completion for input fields
   VALID_TIME_REGEX = /\A([01]?\d?|2[0123]):[012345]?\d?:?[012345]?\d?\z/ # hour:min[:sec]
   VALID_DATE_REGEX = /\A\d{4}-(0?\d?|1[012])-([012]?\d?|3[01])\z/ # year:month:day
-  validates :comments, :length => {:maximum => 150}, :allow_blank => true
+  validates :comments, :length => {:maximum => 255}, :allow_blank => true
   validates :project_id, :numericality => true, :allow_blank => true
   validates :issue_id, :numericality => true, :allow_blank => true
   validates :started_on, :presence => true, :unless => Proc.new { |tt| tt.new_record? }
@@ -27,7 +27,6 @@ class TimeTracker < ActiveRecord::Base
   # so after the input, the validations were called (before saving the object) after that
   # we take the input and convert it to fit into the DateTime-format
   after_validation do
-    # TODO check if user is allowed to change this entry
     # the following updates should only happen if the controller calls this method after an ui-input
     # in all other cases, the fields "start_time" and "date" might be empty
     unless self.start_time.nil? && self.date.nil?
@@ -36,7 +35,7 @@ class TimeTracker < ActiveRecord::Base
   end
 
   before_save do
-    issue = issue_from_id(self.issue_id)
+    issue = help.issue_from_id(self.issue_id)
     if issue.nil?
       self.issue_id = self.issue_id_was unless self.issue_id.blank?
     else
@@ -44,13 +43,48 @@ class TimeTracker < ActiveRecord::Base
     end
   end
 
+  # check user-permissions. in some cass we need to prevent some or all of his actions
+  before_update do
+    # if the object changed and the user has not the permission to change every TimeLog (includes active trackers), we
+    # have to change for special permissions in detail before saving the changes or undo them
+    if self.changed?
+      # changing the comments only could be allowed
+      if (self.changed - ['comments', 'round']).empty?
+        raise StandardError, l(:tt_error_not_allowed_to_change_logs) unless permission_level > 0
+      elsif (self.changed - ['comments', 'round', 'issue_id', 'project_id']).empty?
+        raise StandardError, l(:tt_error_not_allowed_to_change_logs) unless permission_level > 1
+        # want to change more than comments only? => needs more permission!
+      else
+        unless permission_level > 2
+          raise StandardError, l(:tt_error_not_allowed_to_change_logs) if self.user.id == User.current.id
+          raise StandardError, l(:tt_error_not_allowed_to_change_foreign_logs)
+        end
+      end
+    end
+  end
+
+  def permission_level
+    case
+      when User.current.allowed_to_globally?(:tt_edit_time_logs, {}) ||
+          self.user.id == User.current.id && User.current.allowed_to_globally?(:tt_edit_own_time_logs, {})
+        3
+      when User.current.allowed_to_globally?(:tt_edit_bookings, {}) ||
+          self.user.id == User.current.id && help.permission_checker([:tt_book_time, :tt_edit_own_bookings], {}, true)
+        2
+      when self.user.id == User.current.id && User.current.allowed_to_globally?(:tt_log_time, {})
+        1
+      else
+        0
+    end
+  end
+
   def only_one_tracker
-    errors[:base] << :time_tracker_already_running_error unless current.nil?
+    raise StandardError, l(:time_tracker_already_running_error) unless current.nil?
   end
 
   def initialize(arguments = nil)
     unless arguments.nil?
-      issue = issue_from_id(arguments[:issue_id])
+      issue = help.issue_from_id(arguments[:issue_id])
       arguments[:issue_id] = nil if issue.nil?
     end
     super(arguments)
@@ -58,6 +92,7 @@ class TimeTracker < ActiveRecord::Base
     unless issue.nil?
       self.project_id = issue.project_id
     end
+    raise StandardError, l(:tt_error_not_allowed_to_create_time_log) if permission_level < 1
   end
 
   def start
@@ -83,19 +118,8 @@ class TimeTracker < ActiveRecord::Base
         time_log = TimeLog.create(:user_id => user_id, :started_on => started_on, :stopped_at => stop_time, :comments => comments)
         # if there already is a ticket-nr then we automatically associate the timeLog and the issue using a timeBooking-entry
         # and creating a time_entry
-        if issue_id_set?
-          issue = issue_from_id(issue_id)
-          unless issue.nil?
-            # project_id will be set during the add_booking method
-            time_log.project_id = issue.project_id
-            time_log.add_booking(:issue => issue)
-          end
-          # otherwise we check for a project-id and associate the timeLog with an project only, using the project_id-field
-          # of the timeLog. in that case we could create a virtual booking
-        elsif project_id_set?
-          time_log.project_id = project_id
-          time_log.add_booking(:virtual => true)
-        end
+        issue = help.issue_from_id(issue_id)
+        time_log.add_booking({:project_id => project_id, :issue => issue}) unless issue.nil? && project_id.nil?
         # after creating the TimeLog we can remove the TimeTracker, so the user can start a new one
         # print an error-message otherwise
         self.destroy if time_log.save
@@ -134,19 +158,4 @@ class TimeTracker < ActiveRecord::Base
   def current
     TimeTracker.where(:user_id => User.current.id).first
   end
-
-  def issue_from_id(issue_id)
-    Issue.where(:id => issue_id).first
-  end
-
-  def issue_id_set?
-    !issue_id.nil?
-  end
-
-  def project_id_set?
-    !project_id.nil?
-  end
-
 end
-
-

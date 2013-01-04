@@ -1,11 +1,3 @@
-class BookingError < StandardError
-  attr_reader :message
-
-  def initialize(message)
-    @message = message
-  end
-end
-
 class TimeLog < ActiveRecord::Base
   unloadable
 
@@ -17,12 +9,75 @@ class TimeLog < ActiveRecord::Base
 
   # prevent that updating the time_log results in negative bookable_time
   validate :check_time_spent, :on => :update
-  validate :check_bookable, :on => :update
+  validates :comments, :length => {:maximum => 255}, :allow_blank => true
+  validates :user_id, :presence => true
+  validates :started_on, :presence => true
+  validates :stopped_at, :presence => true
 
   scope :bookable, where(:bookable => true)
 
+  scope :visible, lambda {
+    if help.permission_checker([:tt_edit_time_logs], {}, true)
+      {:conditions => "1 = 1"}
+    elsif help.permission_checker([:tt_log_time, :tt_edit_own_time_logs, :tt_book_time, :tt_edit_own_bookings, :tt_edit_bookings], {}, true)
+      where(:user_id => User.current.id)
+    else
+      {:conditions => "1 = 0"}
+    end
+  }
+
+  # we have to check user-permissions. i some cass we have to forbid some or all of his actions
+  before_update do
+    # if the object changed and the user has not the permission to change every TimeLog (includes active trackers), we
+    # have to change for special permissions in detail before saving the changes or undo them
+    if self.changed? && !User.current.allowed_to_globally?(:tt_edit_time_logs, {})
+      # changing the comments only could be allowed
+      if self.changed == ['comments']
+        unless permission_level > 0
+          raise StandardError, l(:tt_error_not_allowed_to_change_logs) if self.user.id == User.current.id
+          raise StandardError, l(:tt_error_not_allowed_to_change_foreign_logs)
+        end
+      elsif (self.changed - ['comments', 'issue_id', 'project_id']).empty?
+        unless permission_level > 1
+          raise StandardError, l(:tt_error_not_allowed_to_change_logs) if self.user.id == User.current.id
+          raise StandardError, l(:tt_error_not_allowed_to_change_foreign_logs)
+        end
+        # want to change more than comments only? => needs more permission!
+      else
+        unless permission_level > 2
+          raise StandardError, l(:tt_error_not_allowed_to_change_logs) if self.user.id == User.current.id
+          raise StandardError, l(:tt_error_not_allowed_to_change_foreign_logs)
+        end
+      end
+    end
+  end
+
+  def permission_level
+    case
+      when User.current.allowed_to_globally?(:tt_edit_time_logs, {}) ||
+          self.user == User.current && User.current.allowed_to_globally?(:tt_edit_own_time_logs, {})
+        3
+      when User.current.allowed_to_globally?(:tt_edit_bookings, {}) ||
+          self.user == User.current && help.permission_checker([:tt_book_time, :tt_edit_own_bookings], {}, true)
+        2
+      when self.user == User.current && User.current.allowed_to_globally?(:tt_log_time, {})
+        1
+      else
+        0
+    end
+  end
+
+  after_save do
+    # we have to keep the "bookable"-flag up-to-date
+    # update_column saves the value without running any callbacks or validations! this is  necessary here because
+    # bookable is a flag which should only be stored in DB to make faster DB-searches possible. so every time something
+    # changes on this object, this flag has to be checked!!
+    self.reload
+    update_column(:bookable, bookable_hours > 0) if self.bookable != (bookable_hours > 0)
+  end
+
   def check_time_spent
-    raise BookingError, l(:tt_update_log_results_in_negative_time) if self.bookable_hours < 0
+    raise StandardError, l(:tt_update_log_results_in_negative_time) if self.bookable_hours < 0
   end
 
   def initialize(arguments = nil, *args)
@@ -32,8 +87,8 @@ class TimeLog < ActiveRecord::Base
   # if issue is the only parameter we get, we will book the whole time to one issue
   # method returns the booking.id if transaction was successfully completed, raises an error otherwise
   def add_booking(args = {})
-    tea = TimeEntryActivity.where(:name => :time_tracker_activity).first
-    default_args = {:started_on => self.started_on, :stopped_at => self.stopped_at, :comments => self.comments, :activity_id => tea.id, :issue => nil, :spent_time => nil, :virtual => false, :project_id => self.project_id}
+    tea = TimeEntryActivity.find_or_create_by_name(:name => :time_tracker_activity, :active => false)
+    default_args = {:started_on => self.started_on, :stopped_at => self.stopped_at, :comments => self.comments, :activity_id => tea.id, :issue => nil, :spent_time => nil, :project_id => self.project_id}
     args = default_args.merge(args)
 
     # TODO check time boundaries
@@ -44,8 +99,8 @@ class TimeLog < ActiveRecord::Base
     args[:spent_time].nil? ? args[:hours] = hours_spent(args[:started_on], args[:stopped_at]) : args[:hours] = help.time_string2hour(args[:spent_time])
     args[:stopped_at] = Time.at(args[:started_on].to_i + (args[:hours] * 3600).to_i).getlocal
 
-    raise BookingError, l(:error_booking_negative_time) if args[:hours] <= 0
-    raise BookingError, l(:error_booking_to_much_time) if args[:hours] > bookable_hours
+    raise StandardError, l(:error_booking_negative_time) if args[:hours] <= 0
+    raise StandardError, l(:error_booking_to_much_time) if args[:hours] > bookable_hours
 
     args[:time_log_id] = self.id
     # userid of booking will be set to the user who created timeLog, even if the admin will create the booking
@@ -53,10 +108,10 @@ class TimeLog < ActiveRecord::Base
     tb = TimeBooking.create(args)
     # tb.persisted? will be true if transaction was successfully completed
     if tb.persisted?
-      update_attribute(:bookable, bookable_hours - tb.hours_spent > 0)
+      update_column(:bookable, (bookable_hours - tb.hours_spent > 0))
       tb.id # return the booking id to get the last added booking
     else
-      raise BookingError, l(:error_add_booking_failed)
+      raise StandardError, l(:error_add_booking_failed)
     end
   end
 
@@ -105,6 +160,6 @@ class TimeLog < ActiveRecord::Base
   end
 
   def check_bookable
-    update_attribute(:bookable, bookable_hours > 0)
+    update_column(:bookable, bookable_hours > 0)
   end
 end
