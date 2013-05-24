@@ -48,8 +48,9 @@ class TimeTrackersController < ApplicationController
       redirect_to :back
     else
       unless params[:time_tracker].nil?
-        @time_tracker.issue_id = params[:time_tracker][:issue_id]
-        @time_tracker.comments = params[:time_tracker][:comments]
+        @time_tracker.issue_id    = params[:time_tracker][:issue_id]
+        @time_tracker.comments    = params[:time_tracker][:comments]
+        @time_tracker.activity_id = params[:time_tracker][:activity_id]
       end
       @time_tracker.stop
       flash[:error] = l(:stop_time_tracker_error) unless @time_tracker.destroyed?
