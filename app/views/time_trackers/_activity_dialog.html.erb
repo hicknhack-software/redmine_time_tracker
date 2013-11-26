@@ -13,7 +13,12 @@
         } else {
             $('#tt_activity').val(val);
         }
-        $.ajax({url: base_url() + '/time_trackers/update?key=<%= User.current.api_key %>&time_tracker[activity_id]=' + val,
+        if (base_url().slice(-1) == "/") {
+          proper_url = base_url();
+        }else{
+          proper_url = base_url() + "/";
+        }
+        $.ajax({url: proper_url + 'time_trackers/update?key=<%= User.current.api_key %>&time_tracker[activity_id]=' + val,
             type: 'PUT'
         });
         $('#tt_activity_dialog_stop').button("option", "disabled", val == '');

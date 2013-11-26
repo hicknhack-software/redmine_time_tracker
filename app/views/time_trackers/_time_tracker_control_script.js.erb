@@ -1,6 +1,7 @@
 // ================== time_tracker_controller helpers ============================
 function updateTTControllerForm(form) {
-    $.ajax({url: base_url() + '/time_trackers/update?key=<%= key %>&' + $("#" + form.id).serialize(),
+
+    $.ajax({url: proper_url + 'time_trackers/update?key=<%= key %>&' + $("#" + form.id).serialize(),
         type: 'PUT',
         dataType: 'html',
         success: function (html) {
