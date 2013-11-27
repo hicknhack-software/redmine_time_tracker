@@ -29,12 +29,14 @@ class TimeTrackersController < ApplicationController
       unless args[:issue_id].nil?
         @issue = Issue.find args[:issue_id]
         @old_status = @issue.status_id
-        @new_status = IssueStatus.find_by_name('progressing').id
+        @new_status = Setting.plugin_redmine_time_tracker[:issue_progress_state]
+        logger.debug(@new_status)
         if @new_status.nil?
-          @new_status = IssueStatus.create(:name => 'progressing', :is_closed => false, :is_default => false)
+          flash[:notice] = l(:notice_no_prog_state)
+        else
+          @issue.status_id = @new_status
+          @issue.save
         end
-        @issue.status_id = @new_status
-        @issue.save
       end
       # parse comments for issue-id
       if args[:issue_id].nil? && !args[:comments].nil? && args[:comments].match(/\A\#(\d+)/)
@@ -80,8 +82,10 @@ class TimeTrackersController < ApplicationController
       end
       unless @time_tracker.issue_id.nil?
         @issue = Issue.find(@time_tracker.issue_id)
-        @issue.status_id = @old_status
-        @issue.save
+        if params[:manage_ticket] == '0'
+          @issue.status_id = @old_status
+          @issue.save
+        end
       end
       @time_tracker.stop
       flash[:error] = l(:stop_time_tracker_error) unless @time_tracker.destroyed?
@@ -92,7 +96,11 @@ class TimeTrackersController < ApplicationController
         start({:issue_id => params[:start_new_time_tracker]})
       else
         unless request.xhr?
-          redirect_to :back
+          if params[:manage_ticket] == '1'
+            redirect_to edit_issue_path(@issue)
+          else
+            redirect_to :back
+          end
         else
           render :partial => 'flash_messages'
         end

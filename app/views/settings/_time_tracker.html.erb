@@ -24,3 +24,8 @@
   <%= label_tag 'settings[round_default]', l(:time_tracker_round_default) %>
   <%= check_box_tag 'settings[round_default]', true, @settings[:round_default] %>
 </p>
+<h3><%= l(:auto_change_status) %></h3>
+<p>
+  <%= label_tag 'settings[issue_progress_state]', l(:time_tracker_issue_progress_state) %>
+  <%= select_tag 'settings[issue_progress_state]',options_from_collection_for_select(IssueStatus.all, 'id', 'name', @settings[:issue_progress_state]), :include_blank => true %>
+</p>

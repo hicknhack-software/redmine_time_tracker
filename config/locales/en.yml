@@ -1,5 +1,8 @@
 # English strings go here for Rails i18n
 en:
+  notice_no_prog_state: "Please choose a progress status in your plugin configuration"
+  time_tracker_issue_progress_state: "Choose progressing status"
+  auto_change_status: "Change status automatically"
   error_booking_negative_time: "Not allowed to book time less than or equal to zero!"
   error_booking_to_much_time: "Not allowed to book more time than available!"
   error_add_booking_failed: "Booking could not be added!"

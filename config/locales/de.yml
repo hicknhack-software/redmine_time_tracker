@@ -1,5 +1,8 @@
 # German strings go here for Rails i18n
 de:
+  notice_no_prog_state: "Bitte wählen Sie in den Plugin Einstellungen ein Bearbeitungsstatus aus"
+  time_tracker_issue_progress_state: "Bearbeitungsstatus wählen"
+  auto_change_status: "Automatische Statusänderung"
   error_booking_negative_time: "Die Zeitangabe muss größer null sein!"
   error_booking_to_much_time: "Es ist nicht möglich mehr Zeit als verfügbar zu buchen!"
   error_add_booking_failed: "Die Zeitbuchung ist fehlgeschlagen!"

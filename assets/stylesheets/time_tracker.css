@@ -162,3 +162,8 @@ tr:hover .tt_list_button {
 .ui-dialog .center {
     text-align: center;
 }
+.close {
+  float:left;
+  size:3;
+  width:30px;
+}
