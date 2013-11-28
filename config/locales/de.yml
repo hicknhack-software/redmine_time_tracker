@@ -1,5 +1,6 @@
 # German strings go here for Rails i18n
 de:
+  tt_activity_dialog_action: "Ticket nach dem Stoppen bearbeiten?"
   notice_no_prog_state: "Bitte wählen Sie in den Plugin Einstellungen ein Bearbeitungsstatus aus"
   time_tracker_issue_progress_state: "Bearbeitungsstatus wählen"
   auto_change_status: "Automatische Statusänderung"

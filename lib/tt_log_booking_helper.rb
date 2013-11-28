@@ -72,7 +72,7 @@ module TtLogBookingHelper
         "DATE(#{self.queried_class.table_name}.started_on) >= '#{Time.now.localtime.beginning_of_month.to_date}' AND DATE(#{self.queried_class.table_name}.started_on) <= '#{Time.now.localtime.end_of_month.to_date}'"
       when "*"
         "DATE(#{self.queried_class.table_name}.started_on) IS NOT NULL"
-      else
+      when "l2w"
         "#{self.queried_class.table_name}.started_on >= '#{(Time.now.localtime-2.weeks).beginning_of_day.to_date}'"
     end
   end

@@ -1,5 +1,6 @@
 # English strings go here for Rails i18n
 en:
+  tt_activity_dialog_action: "Edit the ticket after stopping the timer?"
   notice_no_prog_state: "Please choose a progress status in your plugin configuration"
   time_tracker_issue_progress_state: "Choose progressing status"
   auto_change_status: "Change status automatically"

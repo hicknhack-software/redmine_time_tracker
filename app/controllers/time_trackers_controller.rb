@@ -30,7 +30,6 @@ class TimeTrackersController < ApplicationController
         @issue = Issue.find args[:issue_id]
         @old_status = @issue.status_id
         @new_status = Setting.plugin_redmine_time_tracker[:issue_progress_state]
-        logger.debug(@new_status)
         if @new_status.nil?
           flash[:notice] = l(:notice_no_prog_state)
         else
