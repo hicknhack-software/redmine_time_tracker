@@ -81,7 +81,7 @@ class TimeTrackersController < ApplicationController
       end
       unless @time_tracker.issue_id.nil?
         @issue = Issue.find(@time_tracker.issue_id)
-        if params[:manage_ticket] == '0'
+        if params[:manage_ticket] != '1'
           @issue.status_id = @old_status
           @issue.save
         end

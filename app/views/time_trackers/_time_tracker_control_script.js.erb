@@ -5,6 +5,8 @@ function updateTTControllerForm(form) {
     }else{
       proper_url = base_url() + "/";
     }
+    var ticketId = parseInt($(form).find(time_tracker_issue_text).val().match(/[0-9]+/));
+    var newStatus = "Progressing";
     $.ajax({url: proper_url + 'time_trackers/update?key=<%= key %>&' + $("#" + form.id).serialize(),
         type: 'PUT',
         dataType: 'html',
@@ -17,6 +19,18 @@ function updateTTControllerForm(form) {
             enableIssueAutoCompletion();
         }
     });
+    if (ticketId){
+      $.ajax({url: proper_url+ 'issues/'+ticketId+'.json?key=<%= key %>', 
+          type: 'POST',  
+          dataType: 'json',
+          data: {'issue':{'status_id':'2'}},
+          success: function (json) {
+              console.log(json);
+              alert('yay');
+          }
+      });
+    }
+    
 }
 
 function enableIssueAutoCompletion(){

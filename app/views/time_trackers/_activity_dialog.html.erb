@@ -1,7 +1,7 @@
 <%= javascript_tag render :partial => 'tt_overview/time_tracker', :formats => [:js] %>
 <%
    activities = time_tracker.project_id.nil? ? TimeEntryActivity.shared.active.all : Project.visible.where(:id => time_tracker.project_id).first().activities
-   options = options_from_collection_for_select(activities, :id, :name).split("\n").join("")
+   options = options_from_collection_for_select(activities, :id, :name, time_tracker.activity_id).split("\n").join("")
    select = select_tag :tt_activity, options, {:include_blank => true, :onchange => 'updateActivity()'}
    check = check_box_tag :manage_ticket, '1', checked = true
    check_lbl = label_tag 'manage_ticket', l(:tt_activity_dialog_action)
@@ -9,7 +9,6 @@
    desc = content_tag :p, l(:tt_activity_dialog_description)
 %>
 <script type="text/javascript">
-    var closed_ticket = 1;
     function updateActivity(val) {
         if (typeof(val) === 'undefined') {
             val = $('#tt_activity').val();
@@ -59,7 +58,7 @@
                         create: function () { 
                             $('#tt_activity_dialog_stop').wrap('<%=link_to '','',:data => {:type => 'html'}, :class => 'tt_activity_dialog_stop_link', :remote => remote%>'); 
                             var test = $('#manage_ticket').val();
-                            console.log(test);
+
                             var url = ""
                             if (start_new) {
                                 url = '<%= time_trackers_stop_path(:start_new_time_tracker => (@issue.nil? ? '' : @issue.id))%>&manage_ticket='+test;
@@ -67,7 +66,6 @@
 
                             } else {
                               url = '<%= time_trackers_stop_path()%>?manage_ticket='+test;
-                              console.log(url);
                             }
                             $('.tt_activity_dialog_stop_link').attr('href', url);
                         }

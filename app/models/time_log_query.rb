@@ -1,6 +1,6 @@
 class TimeLogQuery < Query
   include TtQueryOperators
-  include TtLogBookingHelper
+  include TtQueryHelper
 
   self.queried_class = TimeLog
   @visibile_permission = :index_tt_logs_list
@@ -47,7 +47,7 @@ class TimeLogQuery < Query
       rescue ActiveRecord::RecordNotFound
         r = {nil => log_count}
       end
-      qcfc()
+      custom_field_value()
     end
     r
   rescue ::ActiveRecord::StatementInvalid => e

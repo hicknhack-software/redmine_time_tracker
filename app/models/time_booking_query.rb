@@ -1,6 +1,6 @@
 class TimeBookingQuery < Query
   include TtQueryOperators
-  include TtLogBookingHelper
+  include TtQueryHelper
 
   self.queried_class = TimeBooking
   @visible_permission = :index_tt_bookings_list
@@ -68,7 +68,7 @@ class TimeBookingQuery < Query
       rescue ActiveRecord::RecordNotFound
         r = {nil => booking_count}
       end
-      qcfc()
+      custom_field_value()
     end
     r
   rescue ::ActiveRecord::StatementInvalid => e
