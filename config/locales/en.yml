@@ -1,5 +1,9 @@
 # English strings go here for Rails i18n
 en:
+  tt_activity_dialog_action: "Edit the ticket after stopping the timer?"
+  notice_no_prog_state: "Please choose a progress status in your plugin configuration"
+  time_tracker_issue_progress_state: "Choose progressing status"
+  auto_change_status: "Change status automatically"
   error_booking_negative_time: "Not allowed to book time less than or equal to zero!"
   error_booking_to_much_time: "Not allowed to book more time than available!"
   error_add_booking_failed: "Booking could not be added!"
@@ -50,7 +54,9 @@ en:
   time_tracker_delete_success: "Time tracker successfully deleted"
   time_tracker_delete_booking_success: "Time booking successfully deleted"
   tt_activity_dialog_description: "You have set a project but no activity for your time tracker. Please choose one from the list below."
+  tt_activity_dialog_description_set: "If you like you can choose a different activity from the box below."
   tt_activity_dialog_title: "No Activity set"
+  tt_activity_dialog_title_set: "Further actions"
   tt_error_not_allowed_to_book_on_project: "You are not allowed to book time on the specified project!"
   tt_error_not_allowed_to_book_without_project: "You are not allowed to book time without setting a project!"
   tt_error_not_allowed_to_change_foreign_booking: "You are not allowed to change a foreign TimeBooking!"

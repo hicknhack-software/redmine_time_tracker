@@ -33,6 +33,9 @@
                 </div>
               </div>
               <% projects = User.current.memberships.collect(&:project).compact.uniq %>
+              <% if projects.empty? && !@time_tracker.project_id.nil? %>
+                  <% projects = Array(Project.find(@time_tracker.project_id)) %>
+              <% end %>
               <% @time_tracker.project_id.nil? ? select = nil : select = Project.find(@time_tracker.project_id) %>
               <% proj_list = "<option value=''>#{ l(:time_tracker_label_none) }</option>" %>
               <% proj_list << "<option value='' disabled='disabled'>---</option>" %>
