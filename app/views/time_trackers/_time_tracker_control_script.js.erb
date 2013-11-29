@@ -6,7 +6,6 @@ function updateTTControllerForm(form) {
       proper_url = base_url() + "/";
     }
     var ticketId = parseInt($(form).find(time_tracker_issue_text).val().match(/[0-9]+/));
-    var newStatus = "Progressing";
     $.ajax({url: proper_url + 'time_trackers/update?key=<%= key %>&' + $("#" + form.id).serialize(),
         type: 'PUT',
         dataType: 'html',
@@ -19,14 +18,18 @@ function updateTTControllerForm(form) {
             enableIssueAutoCompletion();
         }
     });
-    if (ticketId){
+    /* ToDo: check if ticket ID is a number - add on change to change back the status to the previous one*/
+    if (false){
+      var old_status_id;
+      $.get(proper_url + 'issues/'+ticketId+'.json', function(data){
+        old_status_id = data.issue.status.id;
+      });
+      status_id = '<%= Setting.plugin_redmine_time_tracker[:issue_progress_state] %>';
       $.ajax({url: proper_url+ 'issues/'+ticketId+'.json?key=<%= key %>', 
-          type: 'POST',  
+          type: 'PUT',  
           dataType: 'json',
-          data: {'issue':{'status_id':'2'}},
+          data: {'issue':{'status_id':status_id}},
           success: function (json) {
-              console.log(json);
-              alert('yay');
           }
       });
     }
