@@ -1,4 +1,5 @@
 <%= javascript_tag render :partial => 'tt_overview/time_tracker', :formats => [:js] %>
+
 <%
    activities = time_tracker.project_id.nil? ? TimeEntryActivity.shared.active.all : Project.visible.where(:id => time_tracker.project_id).first().activities
    options = options_from_collection_for_select(activities, :id, :name, time_tracker.activity_id).split("\n").join("")
@@ -6,7 +7,7 @@
    check = check_box_tag :manage_ticket, '1', checked = true
    check_lbl = label_tag 'manage_ticket', l(:tt_activity_dialog_action)
    centered = content_tag :div, select, :class => 'center'
-   desc = content_tag :p, l(:tt_activity_dialog_description)
+  desc = content_tag :p, time_tracker.activity_id.nil? ? l(:tt_activity_dialog_description) : desc = l(:tt_activity_dialog_description_set)
 %>
 <script type="text/javascript">
     function updateActivity(val) {
@@ -28,7 +29,7 @@
     function showActivityDialog(start_new) {
         var $dialog = $('#activity_dialog');
         if ($dialog.length == 0) {
-            $('<div/>', {id: 'activity_dialog', title: '<%= l(:tt_activity_dialog_title)%>'})
+            $('<div/>', {id: 'activity_dialog', title: '<%= time_tracker.activity_id.nil? ? l(:tt_activity_dialog_title) : l(:tt_activity_dialog_title_set) %>'})
                     .appendTo('body')
                     .append('<%=content_tag :div, desc + centered%>')
                     .append('<%=check%>')
