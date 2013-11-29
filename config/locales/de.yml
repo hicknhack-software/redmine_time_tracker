@@ -1,5 +1,9 @@
 # German strings go here for Rails i18n
 de:
+  tt_activity_dialog_action: "Ticket nach dem Stoppen bearbeiten?"
+  notice_no_prog_state: "Bitte wählen Sie in den Plugin Einstellungen ein Bearbeitungsstatus aus"
+  time_tracker_issue_progress_state: "Bearbeitungsstatus wählen"
+  auto_change_status: "Automatische Statusänderung"
   error_booking_negative_time: "Die Zeitangabe muss größer null sein!"
   error_booking_to_much_time: "Es ist nicht möglich mehr Zeit als verfügbar zu buchen!"
   error_add_booking_failed: "Die Zeitbuchung ist fehlgeschlagen!"
@@ -51,7 +55,9 @@ de:
   time_tracker_delete_success: "Zeiter-Tracker gelöscht."
   time_tracker_delete_booking_success: "Die Zeitbuchung wurde gelöscht."
   tt_activity_dialog_description: "Sie haben für den aktiven Zeitmesser ein Projekt, aber keine Aktivität gesetzt. Bitte wählen sie eine aus der untenstehenden Liste."
+  tt_activity_dialog_description_set: "Sie können die Aktivität ändern, indem Sie aus der untenstehenden Liste eine neue auswählen."
   tt_activity_dialog_title: "Keine Aktivität gewählt"
+  tt_activity_dialog_title_set: "Weitere Aktionen"
   tt_error_not_allowed_to_book_on_project: "Sie haben keine Berechtigung zur Zeitbuchung in diesem Projekt!"
   tt_error_not_allowed_to_book_without_project: "Sie haben keine Berechtigung zur Zeitbuchung ohne ein Projekt auszuwählen!"
   tt_error_not_allowed_to_change_foreign_booking: "Sie haben keine Berechtigung fremde Zeitbuchungen zu ändern!"

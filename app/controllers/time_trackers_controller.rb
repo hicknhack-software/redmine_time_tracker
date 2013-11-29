@@ -3,6 +3,8 @@ class TimeTrackersController < ApplicationController
 
   menu_item :time_tracker_menu_tab_overview
   before_filter :js_auth, :authorize_global
+  before_filter :load_issue_status
+  after_filter :save_issue_status
   around_filter :error_handling, :only => [:stop, :start]
   accept_api_auth :update
 
@@ -22,6 +24,18 @@ class TimeTrackersController < ApplicationController
         args[:comments] = params[:time_tracker][:comments].strip if args[:comments].nil? and not params[:time_tracker][:comments].nil?
         args[:activity_id] = params[:time_tracker][:activity_id].strip if args[:activity_id].nil? and not params[:time_tracker][:activity_id].nil?
         args[:project_id] = params[:time_tracker][:project_id].strip if args[:project_id].nil? and not params[:time_tracker][:project_id].nil? and args[:issue_id].blank?
+      end
+      # Autochange Issue status to in Progress
+      unless args[:issue_id].nil?
+        @issue = Issue.find args[:issue_id]
+        @old_status = @issue.status_id
+        @new_status = Setting.plugin_redmine_time_tracker[:issue_progress_state]
+        if @new_status.nil?
+          flash[:notice] = l(:notice_no_prog_state)
+        else
+          @issue.status_id = @new_status
+          @issue.save
+        end
       end
       # parse comments for issue-id
       if args[:issue_id].nil? && !args[:comments].nil? && args[:comments].match(/\A\#(\d+)/)
@@ -65,15 +79,27 @@ class TimeTrackersController < ApplicationController
         @time_tracker.comments = params[:time_tracker][:comments]
         @time_tracker.activity_id = params[:time_tracker][:activity_id]
       end
+      unless @time_tracker.issue_id.nil?
+        @issue = Issue.find(@time_tracker.issue_id)
+        if params[:manage_ticket] != '1'
+          @issue.status_id = @old_status
+          @issue.save
+        end
+      end
       @time_tracker.stop
       flash[:error] = l(:stop_time_tracker_error) unless @time_tracker.destroyed?
       @time_tracker = get_current
+      
       flash[:notice] = l(:stop_time_tracker_success)
       if !params[:start_new_time_tracker].nil?
         start({:issue_id => params[:start_new_time_tracker]})
       else
         unless request.xhr?
-          redirect_to :back
+          if params[:manage_ticket] == '1'
+            redirect_to edit_issue_path(@issue)
+          else
+            redirect_to :back
+          end
         else
           render :partial => 'flash_messages'
         end
@@ -152,4 +178,13 @@ class TimeTrackersController < ApplicationController
       format.any {}
     end
   end
+  
+  private
+      def load_issue_status
+        @old_status = session[:issue_status] || 0
+      end
+
+      def save_issue_status
+        session[:issue_status] = @old_status
+      end
 end
