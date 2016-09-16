@@ -56,7 +56,7 @@ class TimeLogQuery < Query
 
   # Returns the logs
   def logs(options={})
-    group_by_order = group_by_sort_order.join(',').strip()
+    group_by_order = group_by_sort_order.is_a?(Array) ? group_by_sort_order.join(',').strip : (group_by_sort_order || '').strip
     options[:order].unshift group_by_order unless options[:order].map { |opt| opt.gsub('asc', '').gsub('desc', '').strip }.include? group_by_order.gsub('asc', '').gsub('desc', '').strip
     order_option = options[:order].reject { |s| s.blank? }.join(',')
     order_option = nil if order_option.blank?
